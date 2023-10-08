@@ -11,17 +11,26 @@ import {
   updateVisited,
 } from '../util/util';
 import {CONST_TOP_LIMIT} from '../../constants/constants';
-const storageService = StorageService.getInstance();
 
-const slice = createSlice({
-  name: 'news',
-  initialState: <News>{
+const initState = (): News => {
+  const storageService = StorageService.getInstance();
+  const items = storageService.getItems();
+  const filteredList: LocalArticle[] = getFilteredList({
+    isVisited: true,
+    articles: items,
+  });
+
+  return {
     isError: false,
     isLoading: null,
-    articleList: [],
-    subArticles: null,
+    articleList: items,
+    subArticles: filteredList.length > 0 ? filteredList : null,
     isEndReached: null,
-  },
+  };
+};
+const slice = createSlice({
+  name: 'news',
+  initialState: initState,
   reducers: {
     //change it to set
     getNewsStart: action => {
@@ -30,10 +39,10 @@ const slice = createSlice({
       action.isError = false;
       action.isLoading = true;
       action.isEndReached = null;
-      storageService.clearStorage();
     },
     getNewsSuccess: (action, response) => {
       const articles = response.payload.articles;
+      let subArticle: LocalArticle[] = [];
 
       let newList: LocalArticle[] = [];
       if (articles.length > 0) {
@@ -47,11 +56,18 @@ const slice = createSlice({
           };
           newList = [...newList, newElement];
         }
-        //Move to hook
-        const subArticle = getTopNews({
-          limit: CONST_TOP_LIMIT,
+        const filteredList: LocalArticle[] = getFilteredList({
+          isVisited: true,
           articles: newList,
         });
+        if (filteredList.length <= 0) {
+          subArticle = getTopNews({
+            limit: CONST_TOP_LIMIT,
+            articles: newList,
+          });
+        } else {
+          subArticle = filteredList;
+        }
 
         const updatedArticle = updateVisited({
           subArticle: subArticle,
@@ -62,23 +78,10 @@ const slice = createSlice({
 
         action.isEndReached = subArticle.length < CONST_TOP_LIMIT;
         action.isLoading = false;
-
-        storageService.addItemStorage(updatedArticle);
       }
     },
     getNewsFailed: action => {
       action.isError = true;
-    },
-    updateListFromLocalSuccess: (action, response) => {
-      const filteredList: LocalArticle[] = getFilteredList({
-        isVisited: true,
-        articles: response.payload,
-      });
-      action.articleList = response.payload;
-      action.subArticles = filteredList;
-      action.isEndReached = response.payload < CONST_TOP_LIMIT;
-
-      storageService.addItemStorage(response.payload);
     },
     updatedListWithRandomArticle: (action, response) => {
       let randomArticles: LocalArticle[] = [];
@@ -90,7 +93,7 @@ const slice = createSlice({
       if (filteredList.length > 5) {
         const randomIndices: number[] = getRandomIndex({
           quantity: 5,
-          max: filteredList.length-1,
+          max: filteredList.length - 1,
         });
 
         randomArticles = getRandomItems({
@@ -112,7 +115,6 @@ const slice = createSlice({
           : randomArticles;
 
       action.articleList = updatedArticle;
-      storageService.addItemStorage(updatedArticle);
     },
   },
 });
@@ -120,29 +122,30 @@ const {
   getNewsStart,
   getNewsSuccess,
   getNewsFailed,
-  updateListFromLocalSuccess,
+  // updateListFromLocalSuccess,
   updatedListWithRandomArticle,
 } = slice.actions;
 
 export default slice.reducer;
 
-export const getListOfNewsFromApi = () => (dispatch: AppDispatch) => {
-  let payload = {
-    // url: 'everything?q=india&pageSize=100&page=1&apiKey=93772fedfa9044dda2505c63d9b9dcc1',
-    url: '9469c301-0ed9-492c-9993-1d2685edec84',
-    method: httpMethods.GET,
-    onStart: getNewsStart.type,
-    onSuccess: getNewsSuccess.type,
-    onError: getNewsFailed.type,
+export const getListOfNewsFromApi =
+  ({invalidateCache = false}: {invalidateCache: boolean}) =>
+  (dispatch: AppDispatch, getState: () => RootState) => {
+    const articleList = getState()?.news.articleList;
+
+    if (articleList.length > 0 && !invalidateCache) {
+      return;
+    }
+    let payload = {
+      // url: 'everything?q=india&pageSize=100&page=1&apiKey=93772fedfa9044dda2505c63d9b9dcc1',
+      url: '9469c301-0ed9-492c-9993-1d2685edec84',
+      method: httpMethods.GET,
+      onStart: getNewsStart.type,
+      onSuccess: getNewsSuccess.type,
+      onError: getNewsFailed.type,
+    };
+    return dispatch({type: apiCallBegan.type, payload: payload});
   };
-  return dispatch({type: apiCallBegan.type, payload: payload});
-};
-export const updateListFromLocal = () => (dispatch: AppDispatch) => {
-  let payload = {
-    onUpdate: updateListFromLocalSuccess.type,
-  };
-  return dispatch({type: updateFromLocal.type, payload: payload});
-};
 export const updateListWithRandomArticle = () => (dispatch: AppDispatch) => {
   let payload = {};
   return dispatch({type: updatedListWithRandomArticle.type, payload: payload});
@@ -159,4 +162,8 @@ export const getEndReached = createSelector(
 export const getIsLoading = createSelector(
   (state: RootState) => state.news,
   news => news.isLoading,
+);
+export const getArticles = createSelector(
+  (state: RootState) => state.news,
+  news => news.articleList,
 );

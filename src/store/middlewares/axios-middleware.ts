@@ -31,14 +31,7 @@ const makeRequest = async (dispatch: AppDispatch, payload: IPayLoadType) => {
     
     dispatch({type: onError, payload: ex}); // incase any error happens we will dispatch onError with error message
   }
-};
-//it will  the redux from the storage
-const updateData = (dispatch: AppDispatch, payload: ILocalPayLoad) => {
-  const storageService = StorageService.getInstance();
-  const items = storageService.getItems();
-  const {onUpdate} = payload;
-  dispatch({type: onUpdate, payload: items});
-};
+}; 
 const axiosMiddleware =
   (
     {dispatch}: {dispatch: any}, //dispatch, getState
@@ -48,10 +41,6 @@ const axiosMiddleware =
     if (action.type == apiCallBegan.type) {
       console.log('home');
       makeRequest(dispatch, action.payload);
-      return;
-    }
-    if (action.type == updateFromLocal.type) {
-      updateData(dispatch, action.payload);
       return;
     }
     return next(action);
