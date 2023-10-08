@@ -7,11 +7,13 @@ import {Button, Text} from 'react-native-paper';
 const AppleStyleSwipeableRow = ({
   item,
   index,
-  onClick,
+  onPin,
+  onDelete,
 }: {
   item: LocalArticle;
   index: number;
-  onClick: () => void;
+  onPin: () => void;
+  onDelete: () => void;
 }) => {
   let row: Array<any> = [];
   let prevOpenedRow: any;
@@ -22,25 +24,30 @@ const AppleStyleSwipeableRow = ({
     prevOpenedRow = row[index];
   }, []);
 
-  const renderRightActions = useCallback((onClick: () => void) => {
-    return (
-      <View
-        style={{
-          margin: 0,
-          alignContent: 'center',
-          justifyContent: 'center',
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <Button onPress={onClick}>{'Pin'}</Button>
-        <Button onPress={onClick}>{'Delete'}</Button>
-      </View>
-    );
-  }, []);
+  const renderRightActions = useCallback(
+    (onPin: () => void, onDelete: () => void) => {
+      return (
+        <View
+          style={{
+            margin: 0,
+            alignContent: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <Button onPress={onPin}>{'Pin'}</Button>
+          <Button onPress={onDelete}>{'Delete'}</Button>
+        </View>
+      );
+    },
+    [],
+  );
 
   return (
     <Swipeable
-      renderRightActions={(progress, dragX) => renderRightActions(onClick)}
+      renderRightActions={(progress, dragX) =>
+        renderRightActions(onPin, onDelete)
+      }
       onSwipeableOpen={() => closeRow(index)}
       ref={ref => (row[index] = ref)}>
       <View

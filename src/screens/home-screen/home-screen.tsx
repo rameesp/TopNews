@@ -45,13 +45,18 @@ const HomeScreen: React.FC = (): JSX.Element => {
   const renderItem = useCallback(
     ({item, index}: {item: LocalArticle; index: number}) => {
       return (
-        <AppleStyleSwipeableRow item={item} index={index} onClick={() => {}} />
+        <AppleStyleSwipeableRow
+          item={item}
+          index={index}
+          onPin={() => {}}
+          onDelete={() => {}}
+        />
       );
     },
     [],
   );
   const childKeyExtractor = useCallback(
-    (item: LocalArticle, index: number) => `_id${item.id}`,
+    (item: LocalArticle) => `_id${item.id}`,
     [],
   );
 
