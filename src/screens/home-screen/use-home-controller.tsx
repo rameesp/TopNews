@@ -28,13 +28,14 @@ const useHomeController = () => {
     if (timer <= 0 && topNews.length !== articles.length) {
       startTimer(4);
       dispatch(updateListWithRandomArticle());
-      }
+    }
   }, [timer]);
 
   useEffect(() => {
     if (!isLoading) {
       startTimer(4);
     }
+    console.log(isLoading, 'LOADING DATA');
   }, [isLoading]);
 
   const getNextSetOfArticles = () => {

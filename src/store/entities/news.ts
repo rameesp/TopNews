@@ -13,18 +13,11 @@ import {
 import {CONST_TOP_LIMIT} from '../../constants/constants';
 
 const initState = (): News => {
-  const storageService = StorageService.getInstance();
-  const items = storageService.getItems();
-  const filteredList: LocalArticle[] = getFilteredList({
-    isVisited: true,
-    articles: items,
-  });
-
   return {
     isError: false,
-    isLoading: false,
-    articleList: items,
-    subArticles: filteredList,
+    isLoading: true,
+    articleList: [],
+    subArticles: [],
   };
 };
 const slice = createSlice({
@@ -43,9 +36,9 @@ const slice = createSlice({
       );
     },
     getNewsSuccess: (action: News, response: PayloadAction<any>) => {
+     
+      
       const articles = response.payload.articles;
-      console.log(' on net length', articles.length);
-
       let subArticle: LocalArticle[] = [];
 
       let newList: LocalArticle[] = [];
@@ -65,7 +58,6 @@ const slice = createSlice({
           isVisited: true,
           articles: newList,
         });
-        console.log('FILTERED LIST LENGTH' + filteredList.length);
 
         if (filteredList.length <= 0) {
           subArticle = getTopNews({
@@ -75,7 +67,6 @@ const slice = createSlice({
         } else {
           subArticle = filteredList;
         }
-        console.log(subArticle.length, 'SUB LENGTH');
 
         action.subArticles = subArticle;
         const updatedArticle = updateVisited({
@@ -157,11 +148,11 @@ export default slice.reducer;
 export const getListOfNewsFromApi =
   ({invalidateCache = false}: {invalidateCache: boolean}) =>
   (dispatch: AppDispatch, getState: () => RootState) => {
-    const articleList = getState()?.news.articleList;
+    // const articleList = getState()?.news.articleList;
 
-    if (articleList.length > 0 && !invalidateCache) {
-      return;
-    }
+    // if (articleList.length > 0 && !invalidateCache) {
+    //   return;
+    // }
     let payload = {
       // url: 'everything?q=india&pageSize=100&page=1&apiKey=93772fedfa9044dda2505c63d9b9dcc1',
       url: '9469c301-0ed9-492c-9993-1d2685edec84',

@@ -20,6 +20,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
     getNextSetOnArticle,
     getNextBatchOfData,
     onDeleteItem,
+    isLoading,
   } = useHomeController();
   const [data, setData] = useState<LocalArticle[]>([]);
   const [openSnackBar, setOpenSnackBar] = useState<ISnackBar>({
@@ -30,10 +31,10 @@ const HomeScreen: React.FC = (): JSX.Element => {
   });
 
   useEffect(() => {
-    if ( topNews?.length <= 10) {
+    if (!isLoading) {
       setData(topNews);
     }
-  }, [topNews, data]);
+  }, [isLoading, data]);
   useEffect(() => {
     if (
       data.length <= 0 &&
@@ -43,13 +44,8 @@ const HomeScreen: React.FC = (): JSX.Element => {
       getNextBatchOfData();
     }
   }, [data, articlesLength, topNews]);
-  useEffect(() => {
-    console.log(data.length + ' DATA LENGTH');
-  }, [data]);
-
   const onDataDelete = useCallback(
     (article: LocalArticle) => {
-      console.log('SETTED DELETE NEWS' + data.length);
       setData(pre => {
         let newData = [...pre];
         let dataIndex = newData.findIndex(item => {
@@ -69,7 +65,6 @@ const HomeScreen: React.FC = (): JSX.Element => {
   const onLoadLoadedData = useCallback(() => {
     if (topNews && data.length < topNews?.length) {
       setData(topNews);
-      console.log('SETTED onLoadLoadedData NEWS' + topNews.length);
     } else if (topNews && data.length >= topNews?.length) {
       getNextSetOnArticle();
     }
@@ -79,17 +74,13 @@ const HomeScreen: React.FC = (): JSX.Element => {
     setOpenSnackBar({isVisible: false, action: 'REFRESH'});
   }, []);
 
-  const onResetData = () => {
-    setData(_pre => []);
-  };
-
   const onSnackBarAction = useCallback(() => {
     switch (openSnackBar.action) {
       case 'REFRESH':
         onLoadLoadedData();
         break;
       case 'NEW_BATCH':
-        onResetData();
+        setData([]);
         break;
       default:
         break;
