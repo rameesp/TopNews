@@ -1,7 +1,7 @@
-import {createSelector, createSlice} from '@reduxjs/toolkit';
+import {PayloadAction, createSelector, createSlice} from '@reduxjs/toolkit';
 import {AppDispatch, RootState} from '../configure';
 import {httpMethods} from '../../services/http-service/methods';
-import {apiCallBegan, updateFromLocal} from '../actions';
+import {apiCallBegan} from '../actions';
 import {StorageService} from '../../services/storage';
 import {
   getFilteredList,
@@ -22,10 +22,9 @@ const initState = (): News => {
 
   return {
     isError: false,
-    isLoading: null,
+    isLoading: false,
     articleList: items,
-    subArticles: filteredList.length > 0 ? filteredList : null,
-    isEndReached: null,
+    subArticles: filteredList,
   };
 };
 const slice = createSlice({
@@ -35,16 +34,22 @@ const slice = createSlice({
     //change it to set
     getNewsStart: action => {
       action.articleList = [];
-      action.subArticles = null;
+      action.subArticles = [];
       action.isError = false;
       action.isLoading = true;
-      action.isEndReached = null;
+      console.log(
+        'started',
+        action.subArticles.length + ' and ' + action.articleList.length,
+      );
     },
-    getNewsSuccess: (action, response) => {
+    getNewsSuccess: (action: News, response: PayloadAction<any>) => {
       const articles = response.payload.articles;
+      console.log(' on net length', articles.length);
+
       let subArticle: LocalArticle[] = [];
 
       let newList: LocalArticle[] = [];
+
       if (articles.length > 0) {
         for (let index = 0; index < articles.length; index++) {
           const element = articles[index];
@@ -60,6 +65,8 @@ const slice = createSlice({
           isVisited: true,
           articles: newList,
         });
+        console.log('FILTERED LIST LENGTH' + filteredList.length);
+
         if (filteredList.length <= 0) {
           subArticle = getTopNews({
             limit: CONST_TOP_LIMIT,
@@ -68,28 +75,27 @@ const slice = createSlice({
         } else {
           subArticle = filteredList;
         }
+        console.log(subArticle.length, 'SUB LENGTH');
 
+        action.subArticles = subArticle;
         const updatedArticle = updateVisited({
           subArticle: subArticle,
           articles: newList,
         });
         action.articleList = updatedArticle;
-        action.subArticles = subArticle;
-
-        action.isEndReached = subArticle.length < CONST_TOP_LIMIT;
         action.isLoading = false;
       }
     },
     getNewsFailed: action => {
       action.isError = true;
+      action.isLoading = false;
     },
-    updatedListWithRandomArticle: (action, response) => {
+    updatedListWithRandomArticle: (action: News) => {
       let randomArticles: LocalArticle[] = [];
       const filteredList: LocalArticle[] = getFilteredList({
         isVisited: false,
         articles: action.articleList,
       });
-      action.isEndReached = filteredList.length < 5;
       if (filteredList.length > 5) {
         const randomIndices: number[] = getRandomIndex({
           quantity: 5,
@@ -116,13 +122,33 @@ const slice = createSlice({
 
       action.articleList = updatedArticle;
     },
+    onItemDeleted: (action: News, response: PayloadAction<LocalArticle>) => {
+      let copyArticle = [...action.articleList];
+      const articleIndex = copyArticle.findIndex(
+        item => response.payload.id === item.id,
+      );
+      if (articleIndex > -1) {
+        copyArticle.splice(articleIndex, 1);
+        action.articleList = copyArticle;
+      }
+      if (action.subArticles) {
+        let copySubArticle = [...action.subArticles];
+        const subArticleIndex = copySubArticle.findIndex(
+          item => response.payload.id === item.id,
+        );
+        if (subArticleIndex > -1) {
+          copySubArticle.splice(subArticleIndex, 1);
+          action.subArticles = copyArticle;
+        }
+      }
+    },
   },
 });
 const {
   getNewsStart,
   getNewsSuccess,
   getNewsFailed,
-  // updateListFromLocalSuccess,
+  onItemDeleted,
   updatedListWithRandomArticle,
 } = slice.actions;
 
@@ -147,17 +173,17 @@ export const getListOfNewsFromApi =
     return dispatch({type: apiCallBegan.type, payload: payload});
   };
 export const updateListWithRandomArticle = () => (dispatch: AppDispatch) => {
-  let payload = {};
-  return dispatch({type: updatedListWithRandomArticle.type, payload: payload});
+  return dispatch({type: updatedListWithRandomArticle.type, payload: {}});
 };
+
+export const deleteItemInArticle =
+  (item: LocalArticle) => (dispatch: AppDispatch) => {
+    return dispatch({type: onItemDeleted.type, payload: item});
+  };
+
 export const getViewableList = createSelector(
   (state: RootState) => state.news,
   news => news.subArticles,
-);
-
-export const getEndReached = createSelector(
-  (state: RootState) => state.news,
-  news => news.isEndReached,
 );
 export const getIsLoading = createSelector(
   (state: RootState) => state.news,

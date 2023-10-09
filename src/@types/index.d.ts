@@ -1,9 +1,8 @@
 interface News {
   isError: boolean;
-  isLoading: boolean | null;
+  isLoading: boolean;
   articleList: LocalArticle[];
-  subArticles: LocalArticle[] | null;
-  isEndReached: boolean | null;
+  subArticles: LocalArticle[];
 }
 interface Article {
   title: string;

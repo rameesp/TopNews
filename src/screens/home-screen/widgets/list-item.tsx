@@ -1,4 +1,4 @@
-import React, {Component, useCallback} from 'react';
+import React, {Component, memo, useCallback} from 'react';
 import {Animated, StyleSheet, View} from 'react-native';
 import {RectButton} from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -35,8 +35,12 @@ const AppleStyleSwipeableRow = ({
             flexDirection: 'row',
             alignItems: 'center',
           }}>
-          <Button onPress={onPin}>{'Pin'}</Button>
-          <Button onPress={onDelete}>{'Delete'}</Button>
+          <Button onPress={onPin}>
+            {<Text style={{color: 'green', fontWeight: '900'}}>Pin</Text>}
+          </Button>
+          <Button onPress={onDelete}>
+            {<Text style={{color: 'red', fontWeight: '900'}}>Delete</Text>}
+          </Button>
         </View>
       );
     },
@@ -45,9 +49,7 @@ const AppleStyleSwipeableRow = ({
 
   return (
     <Swipeable
-      renderRightActions={(progress, dragX) =>
-        renderRightActions(onPin, onDelete)
-      }
+      renderRightActions={() => renderRightActions(onPin, onDelete)}
       onSwipeableOpen={() => closeRow(index)}
       ref={ref => (row[index] = ref)}>
       <View
@@ -59,7 +61,7 @@ const AppleStyleSwipeableRow = ({
           backgroundColor: 'white',
         }}>
         <Text numberOfLines={2} variant="titleMedium">
-          {item.title}
+          {item.id + ' :' + item.title}
         </Text>
         <Text numberOfLines={2} variant="bodySmall">
           {item.description}
@@ -68,4 +70,4 @@ const AppleStyleSwipeableRow = ({
     </Swipeable>
   );
 };
-export default AppleStyleSwipeableRow;
+export default memo(AppleStyleSwipeableRow);

@@ -9,7 +9,7 @@ const App = (): JSX.Element => {
   return (
     <Provider store={store}>
       <PaperProvider>
-        <SafeAreaView style={{flex: 1}}>
+        <SafeAreaView>
          <MainScreen/>
         </SafeAreaView>
       </PaperProvider>
