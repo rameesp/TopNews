@@ -98,14 +98,18 @@ const HomeScreen: React.FC = (): JSX.Element => {
     setOpenSnackBar({isVisible: false, action: 'REFRESH'});
   }, []);
 
+  const onLoadNextBatch = () => {
+    setData([]);
+    setLoadNextBatch(true);
+  };
+
   const onSnackBarAction = useCallback(() => {
     switch (openSnackBar.action) {
       case 'REFRESH':
         onLoadLoadedData();
         break;
       case 'NEW_BATCH':
-        setData([]);
-        setLoadNextBatch(true);
+        onLoadNextBatch();
         break;
       default:
         break;
@@ -140,16 +144,6 @@ const HomeScreen: React.FC = (): JSX.Element => {
             messageRefresh:
               'Click here to load more data or click on plus icon',
           });
-          // } else if (
-          //   data.length >= topNews?.length &&
-          //   data.length != articlesLength
-          // ) {
-          //   setOpenSnackBar({
-          //     isVisible: true,
-          //     action: 'REFRESH',
-          //     messageRefresh:
-          //       'Click here to load more data or click on plus icon',
-          //   });
         }
       }
     } else if (visibleListLength >= articlesLength) {
@@ -163,7 +157,11 @@ const HomeScreen: React.FC = (): JSX.Element => {
   }, [data, topNews, articlesLength]);
   return (
     <View style={{height: '100%'}}>
-      <AppBar title={'TopNews'} />
+      <AppBar
+        onNextBatch={onLoadNextBatch}
+        onRandomBatch={getNextSetOnArticle}
+        title={'TopNews'}
+      />
       <GestureHandlerRootView style={{flex: 1}}>
         <FlatList
           data={data}

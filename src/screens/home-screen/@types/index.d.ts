@@ -1,3 +1,5 @@
-interface IAppBar{
-    title:String;
+interface IAppBar {
+  title: String;
+  onNextBatch: () => void;
+  onRandomBatch: () => void;
 }

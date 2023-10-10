@@ -5,14 +5,18 @@ import DownloadIcon from '../../../resources/icons/download-icon';
 import RefreshIcon from '../../../resources/icons/refresh-icon';
 
 //to show the title of the app
-const AppBar: React.FC<IAppBar> = ({title}): JSX.Element => {
+const AppBar: React.FC<IAppBar> = ({
+  title,
+  onNextBatch,
+  onRandomBatch,
+}): JSX.Element => {
   return (
     <Appbar.Header elevated>
       <Appbar.Content title={title} />
 
-      <DownloadIcon />
-      <View style={{marginHorizontal:8}}>
-        <RefreshIcon />
+      <DownloadIcon onClick={onNextBatch} />
+      <View style={{marginHorizontal: 8}}>
+        <RefreshIcon onClick={onRandomBatch} />
       </View>
     </Appbar.Header>
   );

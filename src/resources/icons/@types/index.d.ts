@@ -1,0 +1,3 @@
+interface ISvgIcons{
+    onClick:()=>void
+}
