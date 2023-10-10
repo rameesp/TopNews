@@ -11,12 +11,10 @@ interface IPayLoadType {
   onError: string;
   invalidateCache: boolean;
 }
-interface ILocalPayLoad {
-  onUpdate: string;
-}
 const makeRequest = async (dispatch: AppDispatch, payload: IPayLoadType) => {
   const cachedStorage = StorageService.getInstance();
   const {method, url, onStart, onSuccess, onError, invalidateCache} = payload;
+
   const cachedItems = cachedStorage.getItems();
   try {
     const request = {
@@ -24,9 +22,10 @@ const makeRequest = async (dispatch: AppDispatch, payload: IPayLoadType) => {
       url: url,
     };
     dispatch({type: onStart, payload: []}); // before requesting for api it will  dispatch onStart which we can listen on the entities with payload []
-    if (cachedItems.length > 0 && !invalidateCache) {
-      console.log('FROM CACHED');
 
+    //checking weather the data is available in the cache of not 
+    //if invalidate cache request comes we will bypass the request
+    if (cachedItems.length > 0 && !invalidateCache) {
       dispatch({
         type: onSuccess,
         payload: {articles: cachedItems},

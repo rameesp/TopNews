@@ -7,26 +7,24 @@ import homeScreenStyle from '../styles';
 
 //To show the title of the app
 /**
- * 
- * @param title for showing the app title 
- * @param onNextBatch click of the icon which will load the data from backend 
- * @param onRandomBatch click of the icon which will generate a random n number of data and load to the Flat-list 
+ *
+ * @param title for showing the app title
+ * @param onNextBatch click of the icon which will load the data from backend
+ * @param onRandomBatch click of the icon which will generate a random n number of data and load to the Flat-list
  * @returns ()=> JSX.Element
  */
-const AppBar: React.FC<IAppBar> = ({
-  title,
-  onNextBatch,
-  onRandomBatch,
-}): JSX.Element => {
-  return (
-    <Appbar.Header elevated>
-      <Appbar.Content title={title} />
-       <DownloadIcon onClick={onNextBatch} />
-      <View style={homeScreenStyle.refreshIconWrapper}>
-        <RefreshIcon onClick={onRandomBatch} />
-      </View>
-    </Appbar.Header>
-  );
-};
+const AppBar: React.FC<IAppBar> = React.memo(
+  ({title, onNextBatch, onRandomBatch}): JSX.Element => {
+    return (
+      <Appbar.Header elevated>
+        <Appbar.Content title={title} />
+        <DownloadIcon onClick={onNextBatch} />
+        <View style={homeScreenStyle.refreshIconWrapper}>
+          <RefreshIcon onClick={onRandomBatch} />
+        </View>
+      </Appbar.Header>
+    );
+  },
+);
 
 export default AppBar;

@@ -1,3 +1,10 @@
+//to update the articles or all news visited value
+/**
+ *
+ * @param subArticle items needed to ne updated
+ *  @param articles all news list of news
+ * @returns  updated article
+ */
 export const updateVisited = ({
   subArticle,
   articles,
@@ -17,6 +24,13 @@ export const updateVisited = ({
 
   return articles;
 };
+/**
+ *
+ * @param subArticle items needed to ne updated
+ * @param articles overall list of news
+ * @param isPinned  weather the item is pinned or unpinned
+ * @returns  updated article
+ */
 export const updatePinned = ({
   subArticle,
   articles,
@@ -38,6 +52,12 @@ export const updatePinned = ({
 
   return articles;
 };
+/**
+ *
+ * @param limit n number of article that needed to be fetched
+ * @param articles overall list of news
+ * @returns updated article
+ */
 export const getTopNews = ({
   limit,
   articles,
@@ -48,9 +68,15 @@ export const getTopNews = ({
   if (articles.length > limit) {
     return articles.slice(0, limit);
   }
-  return articles;
+  return articles; //updated article
 };
 
+/**
+ * to get the list of data based on visited value
+ * @param isVisited to status of visited value
+ * @param articles all items from state
+ * @returns filtered  article
+ */
 export const getFilteredByVisitedList = ({
   isVisited,
   articles,
@@ -59,8 +85,14 @@ export const getFilteredByVisitedList = ({
   articles: LocalArticle[];
 }): LocalArticle[] =>
   articles.filter(
-    (val: LocalArticle) => val.visited === isVisited && val.pinned == false,
+    (val: LocalArticle) => val.visited === isVisited && val.pinned == false, // val.pinned = false bcz pinned items are separate list and separate filter
   );
+/**
+ * to get the list of data based on pinned value
+ * @param isPinned to status of pinned value
+ * @param articles all items from state
+ * @returns filtered  article
+ */
 export const getFilteredByPinnedList = ({
   isPinned,
   articles,
@@ -69,13 +101,20 @@ export const getFilteredByPinnedList = ({
   articles: LocalArticle[];
 }): LocalArticle[] =>
   articles.filter((val: LocalArticle) => val.pinned === isPinned);
+
+/**
+ * to generate random index for random values
+ * @param quantity sized of random index means number of index 
+ * @param max maximum index value usually list.length-1
+ * @returns array of index with quantity size
+ */
 export const getRandomIndex = ({
   quantity,
   max,
 }: {
   quantity: number;
   max: number;
-}) => {
+}):number[] => {
   const array = [];
 
   while (array.length < quantity) {
@@ -86,7 +125,12 @@ export const getRandomIndex = ({
   }
   return array;
 };
-///articles should be filtered
+/**
+ * to generate list based on random indices
+ * @param randomIndices list of indices
+ * @param articles overall list from state or from which list we have to take the random items
+ * @returns  items with randomly generated items
+ */
 export const getRandomItems = ({
   randomIndices,
   articles,

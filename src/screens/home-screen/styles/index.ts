@@ -26,12 +26,17 @@ const homeScreenStyle = StyleSheet.create({
   },
   deleteButtonTextStyle: {color: 'red', fontWeight: '900'},
   pinButtonTextStyle: {color: 'green', fontWeight: '900'},
-  swipeableContentContainer:{
+  swipeableContentContainer: {
     margin: 4,
     borderColor: 'grey',
     borderWidth: 1,
     padding: 6,
-    
-  }
+  },
+  listContentContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 92,
+  },
+  homeContainer:{height: '100%'}
 });
 export default homeScreenStyle;

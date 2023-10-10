@@ -1,4 +1,3 @@
-import {randomListFromInterval} from '../../util/util';
 import {storage} from './configure';
 
 export class StorageService {
@@ -17,30 +16,11 @@ export class StorageService {
   addItemStorage = (items: LocalArticle[]) => {
     storage.set('news', JSON.stringify(items));
   };
+  //to get all items from the storage
   getItems = (): LocalArticle[] => {
     return JSON.parse(this.#downloads || '[]');
   };
-  //if there are more type of data we can use generic type instead of article type
-  getItem = (numberItems: number): LocalArticle[] => {
-    const filteredList = this.#getUnVisitedList();
-    const slicedArray = filteredList.slice(0, numberItems);
-    return slicedArray ?? [];
-  };
-  getRandomItems = (numberItems: number): LocalArticle[] => {
-    const filteredList = this.#getUnVisitedList();
-    // const listRandom = randomListFromInterval(5, filteredList.length);
-    // console.log(listRandom);
-    return [];
-  };
-  #getUnVisitedList = (): LocalArticle[] => {
-    const list: LocalArticle[] = JSON.parse(this.#downloads || '[]');
-    console.log(JSON.parse(this.#downloads || '[]').length, 'unvisited');
-    return (
-      list.filter(value => {
-        return !value.visited;
-      }) ?? []
-    );
-  };
+  //to clear mmkv storage
   clearStorage = () => {
     storage.set('news', JSON.stringify([]));
   };

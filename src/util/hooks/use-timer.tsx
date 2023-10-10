@@ -10,7 +10,11 @@ interface IProps {
   start?: number;
   fps?: number;
 }
-
+  
+/**
+ * @param start start value of timer 
+ * @param fps from per second
+ */
 const useCountDown = ({start, fps}: IProps): ITimer => {
   const [timer, setTimer] = useState(start || 0);
   const intervalRef = useRef<NodeJS.Timeout>();

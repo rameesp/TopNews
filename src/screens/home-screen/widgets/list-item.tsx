@@ -4,13 +4,6 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {Button, Text} from 'react-native-paper';
 import homeScreenStyle from '../styles';
 
-interface IListItem {
-  item: LocalArticle;
-  index: number;
-  onPinUnPin: () => void;
-  onDelete: () => void;
-  isPinned?: boolean;
-}
 
 /**
  *

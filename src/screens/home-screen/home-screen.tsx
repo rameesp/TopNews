@@ -1,45 +1,48 @@
-import {FlatList, StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import {View} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import AppBar from './widgets/app-bar';
-import {Snackbar} from 'react-native-paper';
 import useHomeController from './use-home-controller';
-import ListItem from './widgets/list-item';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import Fab from './widgets/fab';
-import {pinItemInArticle} from '../../store/entities/news';
+import NewsList from './components/news-list';
+import SnackBar from './components/snack-bar';
+import {SNACKBAR_ACTION} from '../../constants/constants';
+import homeScreenStyle from './styles';
 
-interface ISnackBar {
-  isVisible: boolean;
-  action: 'REFRESH' | 'NEW_BATCH';
-  messageRefresh?: String;
-  messageNextSet?: String;
-}
 const HomeScreen: React.FC = (): JSX.Element => {
   const {
     topNews,
-    articlesLength,
     getNextSetOnArticle,
     getNextBatchOfData,
     onDeleteItem,
     isLoading,
-    pinnedNews,
     onPinItem,
+    unPinnedArticle,
+    articlesLength,
+    pinnedNews,
     visibleListLength,
     onDeletePinned,
     onUnPin,
-    unPinnedArticle,
   } = useHomeController();
-  console.log("building home screen");
-  
+
   const [data, setData] = useState<LocalArticle[]>([]);
-  const [openSnackBar, setOpenSnackBar] = useState<ISnackBar>({
+  const [openSnackBar, setOpenSnackBar] = useState<ISnackBarState>({
     isVisible: false,
     action: 'REFRESH',
     messageRefresh: '',
     messageNextSet: '',
   });
   const [loadNextBatch, setLoadNextBatch] = useState(false);
+  const queuedLength = useMemo(
+    () =>
+      articlesLength !== 0
+        ? topNews != null
+          ? topNews?.length - data.length + ''
+          : data.length + ''
+        : '0',
+    [topNews, data],
+  );
 
+  //after unpinning an article we need to update the state
   useEffect(() => {
     setData(pre => {
       if (unPinnedArticle) {
@@ -49,17 +52,20 @@ const HomeScreen: React.FC = (): JSX.Element => {
       return pre;
     });
   }, [unPinnedArticle]);
-
+  //initial loading of data
   useEffect(() => {
     if (isLoading != null && !isLoading && topNews.length > 0) {
       setData(topNews);
     }
   }, [isLoading]);
+  //to load the data from API
   useEffect(() => {
     if (data.length <= 0 && loadNextBatch) {
       getNextBatchOfData();
     }
   }, [data, loadNextBatch]);
+
+  //after clicking the delete button we need to delete the data from the state
   const onDataDelete = useCallback((article: LocalArticle) => {
     setData(pre => {
       let newData = [...pre];
@@ -68,12 +74,14 @@ const HomeScreen: React.FC = (): JSX.Element => {
       });
       if (dataIndex > -1) {
         newData.splice(dataIndex, 1);
+        //dispatch to redux to update the redux state
         onDeleteItem(article);
         return newData;
       }
       return pre;
     });
   }, []);
+  // after pinning the item we need to remove the data from the state array
   const onDataPinItem = useCallback((article: LocalArticle) => {
     setData(pre => {
       let newData = [...pre];
@@ -82,24 +90,29 @@ const HomeScreen: React.FC = (): JSX.Element => {
       });
       if (dataIndex > -1) {
         newData.splice(dataIndex, 1);
+        //an dispatch to update redux state
         onPinItem(article);
         return newData;
       }
       return pre;
     });
   }, []);
+  //to randomize and load the n set of data
   const onLoadLoadedData = useCallback(() => {
-    if (topNews && data.length < topNews.length) {
+    //if data length is less than the data in the redux state it means there is data in the queue will load all data from the queue
+    if (data.length < topNews.length) {
       setData(topNews);
-    } else if (topNews && data.length >= topNews.length) {
+    } else if (data.length >= topNews.length) {
+      //no data in the queue will dispatch to redux to random generate next set of data
       getNextSetOnArticle();
     }
   }, [topNews, data]);
-
+  //to reset the snack bar
   const openSnackBarDismissed = useCallback(() => {
-    setOpenSnackBar({isVisible: false, action: 'REFRESH'});
+    setOpenSnackBar({isVisible: false, action: SNACKBAR_ACTION.REFRESH});
   }, []);
 
+  //to load the next set of data from backend
   const onLoadNextBatch = () => {
     setData([]);
     setLoadNextBatch(true);
@@ -107,144 +120,74 @@ const HomeScreen: React.FC = (): JSX.Element => {
 
   const onSnackBarAction = useCallback(() => {
     switch (openSnackBar.action) {
-      case 'REFRESH':
+      case SNACKBAR_ACTION.REFRESH: //refresh means we need to next set of data from local
         onLoadLoadedData();
         break;
-      case 'NEW_BATCH':
+      case SNACKBAR_ACTION.NEW_BATCH: //it means we need to load next batch of data from backend
         onLoadNextBatch();
         break;
       default:
         break;
     }
   }, [openSnackBar]);
-
-  const renderItem = useCallback(
-    ({item, index}: {item: LocalArticle; index: number}) => {
-      return (
-        <ListItem
-          item={item}
-          isPinned={false}
-          index={index}
-          onPinUnPin={() => onDataPinItem(item)}
-          onDelete={() => onDataDelete(item)}
-        />
-      );
-    },
-    [],
-  );
-  const childKeyExtractor = useCallback(
-    (item: LocalArticle) => `_id${item.id}`,
-    [],
-  );
+  //on end of flat-list
   const onEndReached = useCallback(() => {
     if (visibleListLength < articlesLength) {
       if (topNews) {
         if (data.length < topNews?.length) {
+          //means there is still data pending in the redux state to load
           setOpenSnackBar({
             isVisible: true,
-            action: 'REFRESH',
+            action: SNACKBAR_ACTION.REFRESH,
             messageRefresh:
               'Click here to load more data or click on plus icon',
           });
         }
       }
     } else if (visibleListLength >= articlesLength) {
+      //it means all data in the redux has been loaded time to load new set of set of data from backend
       setOpenSnackBar({
         isVisible: true,
-        action: 'NEW_BATCH',
+        action: SNACKBAR_ACTION.NEW_BATCH,
         messageNextSet:
           'You have visited all the data , click here to load new data or click on Refresh icon at the top',
       });
     }
   }, [data, topNews, articlesLength]);
+
   return (
-    <View style={{height: '100%'}}>
+    <View style={homeScreenStyle.homeContainer}>
       <AppBar
         onNextBatch={onLoadNextBatch}
         onRandomBatch={getNextSetOnArticle}
         title={'TopNews'}
       />
-      <GestureHandlerRootView style={{flex: 1}}>
-        <FlatList
-          data={data}
-          ListHeaderComponent={
-            <>
-              {pinnedNews.map((item, index) => (
-                <ListItem
-                  key={item.id}
-                  isPinned={true}
-                  item={item}
-                  index={index}
-                  onPinUnPin={() => onUnPin(item)}
-                  onDelete={() => onDeletePinned(item)}
-                />
-              ))}
-            </>
-          }
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 24,
-            paddingBottom: 92,
-          }}
-          onEndReached={onEndReached}
-          renderItem={renderItem}
-          keyExtractor={childKeyExtractor}
-        />
-      </GestureHandlerRootView>
 
-      <Fab
-        label={
-          articlesLength !== 0
-            ? topNews != null
-              ? topNews?.length - data.length + ''
-              : data.length + ''
-            : '0'
-        }
-        onClick={onLoadLoadedData}
+      <NewsList
+        data={data}
+        pinnedNews={pinnedNews}
+        onDeletePinned={item => onDeletePinned(item)}
+        onUnPin={item => onUnPin(item)}
+        onEndReached={onEndReached}
+        onDataDelete={item => onDataDelete(item)}
+        onDataPinItem={item => onDataPinItem(item)}
       />
-
-      <Snackbar
-        visible={openSnackBar.isVisible}
-        duration={3000}
+      <Fab label={queuedLength} onClick={onLoadLoadedData} />
+      <SnackBar
+        isVisible={openSnackBar.isVisible}
         onDismiss={openSnackBarDismissed}
-        action={{
-          label:
-            openSnackBar.action == 'REFRESH' ? 'Load More' : 'Load new batch',
-          onPress: onSnackBarAction,
-        }}>
-        {openSnackBar.action == 'REFRESH'
-          ? openSnackBar.messageRefresh
-          : openSnackBar.messageNextSet}
-      </Snackbar>
+        actionLabel={
+          openSnackBar.action == SNACKBAR_ACTION.REFRESH ? 'Load More' : 'Load new batch'
+        }
+        onAction={onSnackBarAction}
+        message={
+          (openSnackBar.action == SNACKBAR_ACTION.REFRESH 
+            ? openSnackBar.messageRefresh
+            : openSnackBar.messageNextSet) || ''
+        }
+      />
     </View>
   );
 };
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-  },
-  fabStyle: {
-    bottom: 16,
-    right: 16,
-    position: 'absolute',
-  },
-  fab: {
-    position: 'absolute',
-    margin: 16,
-    right: 0,
-    bottom: 8,
-  },
-  surface: {
-    padding: 8,
-    height: 80,
-    width: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-});
 
 export default HomeScreen;
