@@ -29,6 +29,8 @@ const HomeScreen: React.FC = (): JSX.Element => {
     onUnPin,
     unPinnedArticle,
   } = useHomeController();
+  console.log("building home screen");
+  
   const [data, setData] = useState<LocalArticle[]>([]);
   const [openSnackBar, setOpenSnackBar] = useState<ISnackBar>({
     isVisible: false,
@@ -123,7 +125,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
           item={item}
           isPinned={false}
           index={index}
-          onPin={() => onDataPinItem(item)}
+          onPinUnPin={() => onDataPinItem(item)}
           onDelete={() => onDataDelete(item)}
         />
       );
@@ -173,7 +175,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
                   isPinned={true}
                   item={item}
                   index={index}
-                  onPin={() => onUnPin(item)}
+                  onPinUnPin={() => onUnPin(item)}
                   onDelete={() => onDeletePinned(item)}
                 />
               ))}

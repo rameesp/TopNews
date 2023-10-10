@@ -1,50 +1,61 @@
-import React, { memo, useCallback} from 'react';
-import { View} from 'react-native';
+import React, {memo, useCallback} from 'react';
+import {View} from 'react-native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {Button, Text} from 'react-native-paper';
+import homeScreenStyle from '../styles';
 
-const ListItem = ({
-  item,
-  index,
-  onPin,
-  onDelete,
-  isPinned = false,
-}: {
+interface IListItem {
   item: LocalArticle;
   index: number;
-  onPin: () => void;
+  onPinUnPin: () => void;
   onDelete: () => void;
-  isPinned: boolean;
-}) => {
-  let row: Array<any> = [];
-  let prevOpenedRow: any;
-  const closeRow = useCallback((index: number) => {
-    if (prevOpenedRow && prevOpenedRow !== row[index]) {
-      prevOpenedRow.close();
-    }
-    prevOpenedRow = row[index];
-  }, []);
+  isPinned?: boolean;
+}
 
+/**
+ *
+ * @param item item from list @LocalArticle
+ * @param index  index of the list for handling the swipe functionality
+ * @function onPinUnPin on click of pin or unpin button
+ * @function onDelete on click of delete button
+ * @param isPinned to check weather the item is pinned or not
+ *
+ * @returns SX.Element
+ */
+let row: (Swipeable | null)[] = []; //list of swipeable row ref
+let prevOpenedRow: Swipeable | null = null; // swipeable item which is previously opened
+const ListItem: React.FC<IListItem> = ({
+  item,
+  index,
+  onPinUnPin,
+  onDelete,
+  isPinned = false,
+}): JSX.Element => {
+  const closeRow = useCallback(
+    (index: number) => {
+      //to keep one item a time opened
+      if (prevOpenedRow && prevOpenedRow !== row[index]) {
+        prevOpenedRow.close();
+      }
+      prevOpenedRow = row[index];
+    },
+    [row, prevOpenedRow],
+  );
+
+  //render delete and pin button
   const renderRightActions = useCallback(
     (onPin: () => void, onDelete: () => void) => {
       return (
-        <View
-          style={{
-            margin: 0,
-            alignContent: 'center',
-            justifyContent: 'center',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
+        <View style={homeScreenStyle.listItemActionContainer}>
           <Button onPress={onPin}>
             {
-              <Text style={{color: 'green', fontWeight: '900'}}>
+              <Text style={homeScreenStyle.pinButtonTextStyle}>
                 {isPinned ? 'unPin' : 'Pin'}
               </Text>
             }
           </Button>
           <Button onPress={onDelete}>
-            {<Text style={{color: 'red', fontWeight: '900'}}>Delete</Text>}
+            {<Text style={homeScreenStyle.deleteButtonTextStyle}>Delete</Text>}
           </Button>
         </View>
       );
@@ -54,22 +65,19 @@ const ListItem = ({
 
   return (
     <Swipeable
-      renderRightActions={() => renderRightActions(onPin, onDelete)}
+      renderRightActions={() => renderRightActions(onPinUnPin, onDelete)}
       onSwipeableOpen={() => closeRow(index)}
       ref={ref => (row[index] = ref)}>
       <View
-        style={{
-          margin: 4,
-          borderColor: 'grey',
-          borderWidth: 1,
-          padding: 6,
-          backgroundColor: isPinned ? 'grey' : 'white',
-        }}>
+        style={[
+          homeScreenStyle.swipeableContentContainer,
+          {backgroundColor: isPinned ? 'grey' : 'white'},
+        ]}>
         <Text numberOfLines={2} variant="titleMedium">
-          {item.id + ' :' + item.title}
+          {item?.title ?? 'No heading found'}
         </Text>
         <Text numberOfLines={2} variant="bodySmall">
-          {item.description}
+          {item?.description ?? 'No description available'}
         </Text>
       </View>
     </Swipeable>

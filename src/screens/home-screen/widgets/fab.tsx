@@ -1,22 +1,24 @@
-import {Pressable, StyleSheet, View} from 'react-native';
+import {Pressable, View} from 'react-native';
 import React, {memo} from 'react';
-import {MD2Colors, Surface, Text} from 'react-native-paper';
+import {Surface, Text} from 'react-native-paper';
 import AddIcon from '../../../resources/icons/add-icon';
+import homeScreenStyle from '../styles';
 
 interface IFab {
   label: string;
   onClick: () => void;
 }
-
-const Fab: React.FC<IFab> = ({label, onClick}) => {
+/**
+ * we can use fab from react native paper library here for more flexibility , created a custom one
+ * @param label label to show on a FAB
+ * @param onClick click of a fab button
+ * @returns  JSX.Element
+ */
+const Fab: React.FC<IFab> = ({label, onClick}): JSX.Element => {
   return (
     <Pressable onPress={onClick}>
-      <Surface style={styles.fab} elevation={4}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
+      <Surface style={homeScreenStyle.fab} elevation={4}>
+        <View style={homeScreenStyle.fabContentWrapper}>
           <AddIcon />
           <Text style={{fontSize: 22, marginStart: 6}}>{label}</Text>
         </View>
@@ -26,15 +28,3 @@ const Fab: React.FC<IFab> = ({label, onClick}) => {
 };
 
 export default memo(Fab);
-const styles = StyleSheet.create({
-  fab: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    right: 30,
-    bottom: 30,
-    borderRadius: 12,
-    backgroundColor:MD2Colors.purple50
-  },
-});
