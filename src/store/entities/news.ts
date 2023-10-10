@@ -52,19 +52,19 @@ const slice = createSlice({
             pinned: element.pinned ?? false,
             id: index + '',
           };
+
           newList = [...newList, newElement];
         }
-        const filteredList: LocalArticle[] = getFilteredByVisitedList({
-          isVisited: true,
-          articles: newList,
-        });
 
         action.pinnedArticles =
           getFilteredByPinnedList({
             isPinned: true,
             articles: newList,
           }) ?? [];
-
+        const filteredList: LocalArticle[] = getFilteredByVisitedList({
+          isVisited: true,
+          articles: newList,
+        });
         if (filteredList.length <= 0) {
           subArticle = getTopNews({
             limit: CONST_TOP_LIMIT,
@@ -211,6 +211,7 @@ export const getListOfNewsFromApi =
     let payload = {
       // url: 'everything?q=india&pageSize=100&page=1&apiKey=93772fedfa9044dda2505c63d9b9dcc1',
       url: '9469c301-0ed9-492c-9993-1d2685edec84',
+      invalidateCache: invalidateCache,
       method: httpMethods.GET,
       onStart: getNewsStart.type,
       onSuccess: getNewsSuccess.type,

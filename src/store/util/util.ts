@@ -68,7 +68,7 @@ export const getFilteredByPinnedList = ({
   isPinned: boolean;
   articles: LocalArticle[];
 }): LocalArticle[] =>
-  articles.filter((val: LocalArticle) => val.visited === isPinned);
+  articles.filter((val: LocalArticle) => val.pinned === isPinned);
 export const getRandomIndex = ({
   quantity,
   max,
