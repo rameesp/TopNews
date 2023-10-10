@@ -1,7 +1,7 @@
 import {axios_instance} from '../../services/http-service/config';
 import {httpMethods} from '../../services/http-service/methods';
 import {AppDispatch} from '../configure';
-import {apiCallBegan, updateFromLocal} from '../actions/index';
+import {apiCallBegan} from '../actions/index';
 import {StorageService} from '../../services/storage';
 interface IPayLoadType {
   method: httpMethods;
