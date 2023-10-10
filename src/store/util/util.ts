@@ -17,7 +17,27 @@ export const updateVisited = ({
 
   return articles;
 };
+export const updatePinned = ({
+  subArticle,
+  articles,
+  isPinned,
+}: {
+  subArticle: LocalArticle[];
+  articles: LocalArticle[];
+  isPinned: boolean;
+}) => {
+  for (let index = 0; index < subArticle.length; index++) {
+    const element = subArticle[index];
+    if (element.id) {
+      const indexFound = articles.findIndex(ele => ele.id == element.id);
+      if (indexFound > -1) {
+        articles[indexFound] = {...articles[indexFound], visited: isPinned};
+      }
+    }
+  }
 
+  return articles;
+};
 export const getTopNews = ({
   limit,
   articles,
@@ -31,14 +51,24 @@ export const getTopNews = ({
   return articles;
 };
 
-export const getFilteredList = ({
+export const getFilteredByVisitedList = ({
   isVisited,
   articles,
 }: {
   isVisited: boolean;
   articles: LocalArticle[];
 }): LocalArticle[] =>
-  articles.filter((val: LocalArticle) => val.visited === isVisited);
+  articles.filter(
+    (val: LocalArticle) => val.visited === isVisited && val.pinned == false,
+  );
+export const getFilteredByPinnedList = ({
+  isPinned,
+  articles,
+}: {
+  isPinned: boolean;
+  articles: LocalArticle[];
+}): LocalArticle[] =>
+  articles.filter((val: LocalArticle) => val.visited === isPinned);
 export const getRandomIndex = ({
   quantity,
   max,

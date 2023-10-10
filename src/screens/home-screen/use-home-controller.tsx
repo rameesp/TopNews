@@ -5,7 +5,11 @@ import {
   getArticles,
   getIsLoading,
   getListOfNewsFromApi,
+  getPinnedArticles,
+  getUnPinnedArticle,
   getViewableList,
+  pinItemInArticle,
+  unPinItemInArticle,
   updateListWithRandomArticle,
 } from '../../store/entities/news';
 import {AppDispatch} from '../../store/configure';
@@ -14,8 +18,10 @@ import {StorageService} from '../../services/storage';
 
 const useHomeController = () => {
   const topNews = useSelector(getViewableList);
+  const pinnedNews = useSelector(getPinnedArticles);
   const isLoading = useSelector(getIsLoading);
   const articles = useSelector(getArticles);
+  const unPinnedArticle = useSelector(getUnPinnedArticle);
   const dispatch = useDispatch<AppDispatch>();
   const {timer, startTimer, stopTimer} = useCountDown({start: 0});
   const storageService = StorageService.getInstance();
@@ -32,10 +38,9 @@ const useHomeController = () => {
   }, [timer]);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (isLoading != null && !isLoading) {
       startTimer(4);
     }
-    console.log(isLoading, 'LOADING DATA');
   }, [isLoading]);
 
   const getNextSetOfArticles = () => {
@@ -52,13 +57,28 @@ const useHomeController = () => {
   const onDeleteItem = useCallback((item: LocalArticle) => {
     dispatch(deleteItemInArticle(item));
   }, []);
+  const onPinItem = useCallback((item: LocalArticle) => {
+    dispatch(pinItemInArticle(item));
+  }, []);
+  const onDeletePinned = useCallback((item: LocalArticle) => {
+    dispatch(deleteItemInArticle(item));
+  }, []);
+  const onUnPin = useCallback((item: LocalArticle) => {
+    dispatch(unPinItemInArticle(item));
+  }, []);
   return {
-    topNews: topNews,
-    isLoading: isLoading,
+    topNews,
+    isLoading,
     articlesLength: articles.length,
     getNextSetOnArticle: getNextSetOfArticles,
-    getNextBatchOfData: getNextBatchOfData,
-    onDeleteItem: onDeleteItem,
+    getNextBatchOfData,
+    onDeleteItem,
+    pinnedNews,
+    onPinItem,
+    visibleListLength: topNews.length + pinnedNews.length,
+    onDeletePinned,
+    onUnPin,
+    unPinnedArticle,
   };
 };
 

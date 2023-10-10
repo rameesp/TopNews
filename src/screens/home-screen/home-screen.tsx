@@ -1,11 +1,12 @@
 import {FlatList, StyleSheet, View} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import AppBar from './widgets/app-bar';
-import {Card, Snackbar, Text} from 'react-native-paper';
+import {Snackbar} from 'react-native-paper';
 import useHomeController from './use-home-controller';
-import AppleStyleSwipeableRow from './widgets/list-item';
+import ListItem from './widgets/list-item';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import Fab from './widgets/fab';
+import {pinItemInArticle} from '../../store/entities/news';
 
 interface ISnackBar {
   isVisible: boolean;
@@ -21,6 +22,12 @@ const HomeScreen: React.FC = (): JSX.Element => {
     getNextBatchOfData,
     onDeleteItem,
     isLoading,
+    pinnedNews,
+    onPinItem,
+    visibleListLength,
+    onDeletePinned,
+    onUnPin,
+    unPinnedArticle,
   } = useHomeController();
   const [data, setData] = useState<LocalArticle[]>([]);
   const [openSnackBar, setOpenSnackBar] = useState<ISnackBar>({
@@ -29,43 +36,60 @@ const HomeScreen: React.FC = (): JSX.Element => {
     messageRefresh: '',
     messageNextSet: '',
   });
+  const [loadNextBatch, setLoadNextBatch] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) {
+    setData(pre => {
+      if (unPinnedArticle) {
+        return [unPinnedArticle, ...pre];
+      }
+
+      return pre;
+    });
+  }, [unPinnedArticle]);
+
+  useEffect(() => {
+    if (isLoading != null && !isLoading && topNews.length > 0) {
       setData(topNews);
     }
-  }, [isLoading, data]);
+  }, [isLoading]);
   useEffect(() => {
-    if (
-      data.length <= 0 &&
-      articlesLength == topNews?.length &&
-      articlesLength > 0
-    ) {
+    if (data.length <= 0 && loadNextBatch) {
       getNextBatchOfData();
     }
-  }, [data, articlesLength, topNews]);
-  const onDataDelete = useCallback(
-    (article: LocalArticle) => {
-      setData(pre => {
-        let newData = [...pre];
-        let dataIndex = newData.findIndex(item => {
-          return item.id == article.id;
-        });
-        if (dataIndex > -1) {
-          newData.splice(dataIndex, 1);
-          onDeleteItem(article);
-          return newData;
-        }
-        return pre;
+  }, [data, loadNextBatch]);
+  const onDataDelete = useCallback((article: LocalArticle) => {
+    setData(pre => {
+      let newData = [...pre];
+      let dataIndex = newData.findIndex(item => {
+        return item.id == article.id;
       });
-    },
-    [data],
-  );
-
+      if (dataIndex > -1) {
+        newData.splice(dataIndex, 1);
+        onDeleteItem(article);
+        return newData;
+      }
+      return pre;
+    });
+  }, []);
+  const onDataPinItem = useCallback((article: LocalArticle) => {
+    setData(pre => {
+      let newData = [...pre];
+      let dataIndex = newData.findIndex(item => {
+        return item.id == article.id;
+      });
+      if (dataIndex > -1) {
+        newData.splice(dataIndex, 1);
+        onPinItem(article);
+        return newData;
+      }
+      return pre;
+    });
+  }, []);
   const onLoadLoadedData = useCallback(() => {
-    if (topNews && data.length < topNews?.length) {
+    if (topNews && data.length < topNews.length) {
       setData(topNews);
-    } else if (topNews && data.length >= topNews?.length) {
+    } else if (topNews && data.length >= topNews.length) {
       getNextSetOnArticle();
     }
   }, [topNews, data]);
@@ -81,6 +105,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
         break;
       case 'NEW_BATCH':
         setData([]);
+        setLoadNextBatch(true);
         break;
       default:
         break;
@@ -90,10 +115,11 @@ const HomeScreen: React.FC = (): JSX.Element => {
   const renderItem = useCallback(
     ({item, index}: {item: LocalArticle; index: number}) => {
       return (
-        <AppleStyleSwipeableRow
+        <ListItem
           item={item}
+          isPinned={false}
           index={index}
-          onPin={() => {}}
+          onPin={() => onDataPinItem(item)}
           onDelete={() => onDataDelete(item)}
         />
       );
@@ -105,7 +131,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
     [],
   );
   const onEndReached = useCallback(() => {
-    if (data.length < articlesLength) {
+    if (visibleListLength < articlesLength) {
       if (topNews) {
         if (data.length < topNews?.length) {
           setOpenSnackBar({
@@ -114,19 +140,19 @@ const HomeScreen: React.FC = (): JSX.Element => {
             messageRefresh:
               'Click here to load more data or click on plus icon',
           });
-        } else if (
-          data.length >= topNews?.length &&
-          data.length != articlesLength
-        ) {
-          setOpenSnackBar({
-            isVisible: true,
-            action: 'REFRESH',
-            messageRefresh:
-              'Click here to load more data or click on plus icon',
-          });
+          // } else if (
+          //   data.length >= topNews?.length &&
+          //   data.length != articlesLength
+          // ) {
+          //   setOpenSnackBar({
+          //     isVisible: true,
+          //     action: 'REFRESH',
+          //     messageRefresh:
+          //       'Click here to load more data or click on plus icon',
+          //   });
         }
       }
-    } else if (data.length >= articlesLength) {
+    } else if (visibleListLength >= articlesLength) {
       setOpenSnackBar({
         isVisible: true,
         action: 'NEW_BATCH',
@@ -141,7 +167,20 @@ const HomeScreen: React.FC = (): JSX.Element => {
       <GestureHandlerRootView style={{flex: 1}}>
         <FlatList
           data={data}
-          ListHeaderComponent={<></>}
+          ListHeaderComponent={
+            <>
+              {pinnedNews.map((item, index) => (
+                <ListItem
+                  key={item.id}
+                  isPinned={true}
+                  item={item}
+                  index={index}
+                  onPin={() => onUnPin(item)}
+                  onDelete={() => onDeletePinned(item)}
+                />
+              ))}
+            </>
+          }
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingTop: 24,

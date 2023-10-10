@@ -4,10 +4,12 @@ import {httpMethods} from '../../services/http-service/methods';
 import {apiCallBegan} from '../actions';
 import {StorageService} from '../../services/storage';
 import {
-  getFilteredList,
+  getFilteredByPinnedList,
+  getFilteredByVisitedList,
   getRandomIndex,
   getRandomItems,
   getTopNews,
+  updatePinned,
   updateVisited,
 } from '../util/util';
 import {CONST_TOP_LIMIT} from '../../constants/constants';
@@ -15,9 +17,11 @@ import {CONST_TOP_LIMIT} from '../../constants/constants';
 const initState = (): News => {
   return {
     isError: false,
-    isLoading: true,
+    isLoading: null,
     articleList: [],
     subArticles: [],
+    pinnedArticles: [],
+    unPinnedArticle: null,
   };
 };
 const slice = createSlice({
@@ -28,16 +32,11 @@ const slice = createSlice({
     getNewsStart: action => {
       action.articleList = [];
       action.subArticles = [];
+      action.pinnedArticles = [];
       action.isError = false;
       action.isLoading = true;
-      console.log(
-        'started',
-        action.subArticles.length + ' and ' + action.articleList.length,
-      );
     },
     getNewsSuccess: (action: News, response: PayloadAction<any>) => {
-     
-      
       const articles = response.payload.articles;
       let subArticle: LocalArticle[] = [];
 
@@ -49,15 +48,22 @@ const slice = createSlice({
           const newElement = {
             title: element.title,
             description: element.description,
-            visited: false,
+            visited: element.visited ?? false,
+            pinned: element.pinned ?? false,
             id: index + '',
           };
           newList = [...newList, newElement];
         }
-        const filteredList: LocalArticle[] = getFilteredList({
+        const filteredList: LocalArticle[] = getFilteredByVisitedList({
           isVisited: true,
           articles: newList,
         });
+
+        action.pinnedArticles =
+          getFilteredByPinnedList({
+            isPinned: true,
+            articles: newList,
+          }) ?? [];
 
         if (filteredList.length <= 0) {
           subArticle = getTopNews({
@@ -83,7 +89,7 @@ const slice = createSlice({
     },
     updatedListWithRandomArticle: (action: News) => {
       let randomArticles: LocalArticle[] = [];
-      const filteredList: LocalArticle[] = getFilteredList({
+      const filteredList: LocalArticle[] = getFilteredByVisitedList({
         isVisited: false,
         articles: action.articleList,
       });
@@ -122,15 +128,67 @@ const slice = createSlice({
         copyArticle.splice(articleIndex, 1);
         action.articleList = copyArticle;
       }
-      if (action.subArticles) {
+      if (response.payload.pinned) {
+        let copyPinnedArticles = [...action.pinnedArticles];
+        const pinnedArticleIndex = copyPinnedArticles.findIndex(
+          item => response.payload.id === item.id,
+        );
+        if (pinnedArticleIndex > -1) {
+          copyPinnedArticles.splice(pinnedArticleIndex, 1);
+          action.pinnedArticles = copyPinnedArticles;
+        }
+      } else {
         let copySubArticle = [...action.subArticles];
         const subArticleIndex = copySubArticle.findIndex(
           item => response.payload.id === item.id,
         );
         if (subArticleIndex > -1) {
           copySubArticle.splice(subArticleIndex, 1);
-          action.subArticles = copyArticle;
+          action.subArticles = copySubArticle;
         }
+      }
+    },
+
+    onPinItem: (action: News, response: PayloadAction<LocalArticle>) => {
+      const copySubArticle = [...action.subArticles];
+      const subArticleIndex = copySubArticle.findIndex(
+        item => response.payload.id === item.id,
+      );
+      if (subArticleIndex > -1) {
+        const pinnedItem: LocalArticle = {
+          ...copySubArticle[subArticleIndex],
+          visited: true,
+          pinned: true,
+        };
+        action.pinnedArticles = [...action.pinnedArticles, pinnedItem];
+        copySubArticle.splice(subArticleIndex, 1);
+        action.subArticles = copySubArticle;
+        action.articleList = updateVisited({
+          subArticle: [pinnedItem],
+          articles: action.articleList,
+        });
+      }
+    },
+    onUnPinItem: (action: News, response: PayloadAction<LocalArticle>) => {
+      const copyPinnedArticle = [...action.pinnedArticles];
+      const pinnedIndex = copyPinnedArticle.findIndex(
+        item => item.id === response.payload.id,
+      );
+      if (pinnedIndex > -1) {
+        const pinnedItem: LocalArticle = {
+          ...copyPinnedArticle[pinnedIndex],
+          visited: true,
+          pinned: false,
+        };
+        copyPinnedArticle.splice(pinnedIndex, 1);
+        action.pinnedArticles = copyPinnedArticle;
+        action.subArticles = [pinnedItem, ...action.subArticles];
+        action.articleList = updatePinned({
+          subArticle: [pinnedItem],
+          articles: action.articleList,
+          isPinned: false,
+        });
+        action.unPinnedArticle = response.payload;
       }
     },
   },
@@ -140,6 +198,8 @@ const {
   getNewsSuccess,
   getNewsFailed,
   onItemDeleted,
+  onPinItem,
+  onUnPinItem,
   updatedListWithRandomArticle,
 } = slice.actions;
 
@@ -148,11 +208,6 @@ export default slice.reducer;
 export const getListOfNewsFromApi =
   ({invalidateCache = false}: {invalidateCache: boolean}) =>
   (dispatch: AppDispatch, getState: () => RootState) => {
-    // const articleList = getState()?.news.articleList;
-
-    // if (articleList.length > 0 && !invalidateCache) {
-    //   return;
-    // }
     let payload = {
       // url: 'everything?q=india&pageSize=100&page=1&apiKey=93772fedfa9044dda2505c63d9b9dcc1',
       url: '9469c301-0ed9-492c-9993-1d2685edec84',
@@ -171,7 +226,14 @@ export const deleteItemInArticle =
   (item: LocalArticle) => (dispatch: AppDispatch) => {
     return dispatch({type: onItemDeleted.type, payload: item});
   };
-
+export const pinItemInArticle =
+  (item: LocalArticle) => (dispatch: AppDispatch) => {
+    return dispatch({type: onPinItem.type, payload: item});
+  };
+export const unPinItemInArticle =
+  (item: LocalArticle) => (dispatch: AppDispatch) => {
+    return dispatch({type: onUnPinItem.type, payload: item});
+  };
 export const getViewableList = createSelector(
   (state: RootState) => state.news,
   news => news.subArticles,
@@ -183,4 +245,13 @@ export const getIsLoading = createSelector(
 export const getArticles = createSelector(
   (state: RootState) => state.news,
   news => news.articleList,
+);
+
+export const getPinnedArticles = createSelector(
+  (state: RootState) => state.news,
+  news => news.pinnedArticles,
+);
+export const getUnPinnedArticle = createSelector(
+  (state: RootState) => state.news,
+  news => news.unPinnedArticle,
 );
