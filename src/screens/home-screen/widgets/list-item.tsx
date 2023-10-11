@@ -3,6 +3,8 @@ import {View} from 'react-native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {Button, Text} from 'react-native-paper';
 import homeScreenStyle from '../styles';
+import AppColors from '../../../resources/values/colors';
+import AppString from '../../../resources/values/strings';
 
 /**
  *

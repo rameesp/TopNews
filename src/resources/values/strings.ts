@@ -9,3 +9,4 @@ const AppString = {
     loadMore:'Load More',
     loadNewBatch:'Load new batch'
 };
+export default AppString

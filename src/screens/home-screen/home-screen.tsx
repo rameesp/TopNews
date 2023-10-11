@@ -7,6 +7,7 @@ import NewsList from './components/news-list';
 import SnackBar from './components/snack-bar';
 import {SNACKBAR_ACTION} from '../../constants/constants';
 import homeScreenStyle from './styles';
+import AppString from '../../resources/values/strings';
 
 const HomeScreen: React.FC = (): JSX.Element => {
   const {
