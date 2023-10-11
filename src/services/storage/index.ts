@@ -1,5 +1,5 @@
 import {storage} from './configure';
-
+const CONST_STORAGE_KEY = 'news';
 export class StorageService {
   private static instance: StorageService;
   private constructor() {}
@@ -11,10 +11,10 @@ export class StorageService {
 
     return StorageService.instance;
   }
-  #downloads = storage.getString('news');
+  #downloads = storage.getString(CONST_STORAGE_KEY);
   //if there are more type of data we can use generic type instead of article type
   addItemStorage = (items: LocalArticle[]) => {
-    storage.set('news', JSON.stringify(items));
+    storage.set(CONST_STORAGE_KEY, JSON.stringify(items));
   };
   //to get all items from the storage
   getItems = (): LocalArticle[] => {
@@ -22,6 +22,6 @@ export class StorageService {
   };
   //to clear mmkv storage
   clearStorage = () => {
-    storage.set('news', JSON.stringify([]));
+    storage.set(CONST_STORAGE_KEY, JSON.stringify([]));
   };
 }

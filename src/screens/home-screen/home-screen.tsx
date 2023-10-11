@@ -27,7 +27,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
   const [data, setData] = useState<LocalArticle[]>([]);
   const [openSnackBar, setOpenSnackBar] = useState<ISnackBarState>({
     isVisible: false,
-    action: 'REFRESH',
+    action: SNACKBAR_ACTION.REFRESH,
     messageRefresh: '',
     messageNextSet: '',
   });
@@ -139,8 +139,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
           setOpenSnackBar({
             isVisible: true,
             action: SNACKBAR_ACTION.REFRESH,
-            messageRefresh:
-              'Click here to load more data or click on plus icon',
+            messageRefresh: AppString.refreshDataMessage,
           });
         }
       }
@@ -149,8 +148,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
       setOpenSnackBar({
         isVisible: true,
         action: SNACKBAR_ACTION.NEW_BATCH,
-        messageNextSet:
-          'You have visited all the data , click here to load new data or click on Refresh icon at the top',
+        messageNextSet: AppString.loadNextBatchMessage,
       });
     }
   }, [data, topNews, articlesLength]);
@@ -160,7 +158,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
       <AppBar
         onNextBatch={onLoadNextBatch}
         onRandomBatch={getNextSetOnArticle}
-        title={'TopNews'}
+        title={AppString.appTitle}
       />
 
       <NewsList
@@ -177,11 +175,13 @@ const HomeScreen: React.FC = (): JSX.Element => {
         isVisible={openSnackBar.isVisible}
         onDismiss={openSnackBarDismissed}
         actionLabel={
-          openSnackBar.action == SNACKBAR_ACTION.REFRESH ? 'Load More' : 'Load new batch'
+          openSnackBar.action == SNACKBAR_ACTION.REFRESH
+            ? AppString.loadMore
+            : AppString.loadNewBatch
         }
         onAction={onSnackBarAction}
         message={
-          (openSnackBar.action == SNACKBAR_ACTION.REFRESH 
+          (openSnackBar.action == SNACKBAR_ACTION.REFRESH
             ? openSnackBar.messageRefresh
             : openSnackBar.messageNextSet) || ''
         }

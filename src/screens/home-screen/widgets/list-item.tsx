@@ -4,7 +4,6 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {Button, Text} from 'react-native-paper';
 import homeScreenStyle from '../styles';
 
-
 /**
  *
  * @param item item from list @LocalArticle
@@ -43,7 +42,7 @@ const ListItem: React.FC<IListItem> = ({
           <Button onPress={onPin}>
             {
               <Text style={homeScreenStyle.pinButtonTextStyle}>
-                {isPinned ? 'unPin' : 'Pin'}
+                {isPinned ? AppString.unPin : AppString.pin}
               </Text>
             }
           </Button>
@@ -67,10 +66,10 @@ const ListItem: React.FC<IListItem> = ({
           {backgroundColor: isPinned ? 'grey' : 'white'},
         ]}>
         <Text numberOfLines={2} variant="titleMedium">
-          {item?.title ?? 'No heading found'}
+          {item?.title ?? AppString.errorHeading}
         </Text>
         <Text numberOfLines={2} variant="bodySmall">
-          {item?.description ?? 'No description available'}
+          {item?.description ?? AppString.errorDescription}
         </Text>
       </View>
     </Swipeable>
