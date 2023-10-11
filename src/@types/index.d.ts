@@ -2,7 +2,7 @@ interface News {
   isError: boolean;
   isLoading: boolean | null;
   articleList: LocalArticle[];
-  subArticles: LocalArticle[];
+  visibleArticles: LocalArticle[];
   pinnedArticles: LocalArticle[];
   unPinnedArticle: LocalArticle | null;
 }

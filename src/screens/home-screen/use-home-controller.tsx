@@ -4,7 +4,7 @@ import {
   deleteItemInArticle,
   getArticles,
   getIsLoading,
-  getListOfNewsFromApi,
+  callNewsApi,
   getPinnedArticles,
   getUnPinnedArticle,
   getViewableList,
@@ -24,7 +24,7 @@ const useHomeController = () => {
   const articles = useSelector(getArticles);//total news list
   const unPinnedArticle = useSelector(getUnPinnedArticle);//unpinned item from pinned list
   const dispatch = useDispatch<AppDispatch>();
-  const {timer, startTimer, stopTimer} = useCountDown({start: 0});//count down timer hook
+  const {timer, startTimer, stopTimer} = useCountDown({start: 0,fps:10});//count down timer hook
   const storageService = StorageService.getInstance();
   useEffect(() => {
     if (articles.length > 0) {
@@ -35,6 +35,8 @@ const useHomeController = () => {
   useEffect(() => {
     //if timer is timed out to randomize and load next set of data
     if (timer <= 0 && topNews.length !== articles.length) {
+      console.log(timer);
+      
       startTimerWithTimeLimit()
       dispatch(updateListWithRandomArticle());
     }
@@ -57,7 +59,7 @@ const useHomeController = () => {
   //to load next batch 
   const getNextBatchOfData = () => {
     storageService.clearStorage();//clear storage before loading next batch
-    dispatch(getListOfNewsFromApi({invalidateCache: true}));
+    dispatch(callNewsApi({invalidateCache: true}));
   };
  
   //on delete an item

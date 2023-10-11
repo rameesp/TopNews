@@ -13,7 +13,7 @@ interface IProps {
   
 /**
  * @param start start value of timer 
- * @param fps from per second
+ * @param fps ticker will tick after every n seconds
  */
 const useCountDown = ({start, fps}: IProps): ITimer => {
   const [timer, setTimer] = useState(start || 0);
