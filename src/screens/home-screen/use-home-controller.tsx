@@ -30,6 +30,10 @@ const useHomeController = () => {
   const storageService = StorageService.getInstance();
   useEffect(() => {
     if (articles.length > 0) {
+      /**
+       * best practice to move this oration to redux only , its not okay to expose this in the app logic ,
+       * last minute i didn't took the risk
+       */
       storageService.addItemStorage(articles);
       //updating the storage on changes happening
     }
