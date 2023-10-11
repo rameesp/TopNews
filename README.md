@@ -2,7 +2,7 @@
 Welcome to Top News 
 ## APP LINK : https://drive.google.com/file/d/1VM3hn4XV9XlpLdAZsXSwOoUBwAkIWDUN/view?usp=sharing
 
-![Alt text](https://drive.google.com/file/d/1C6rfScEkj0TH14FJkwVVsvJDzXGczuIk/view?usp=sharing "Optional title")
+![Alt text](./app-img/appImg.png?raw=true "Top News")
 ## Caching and Data fetching
 API used : https://newsapi.org/
 
