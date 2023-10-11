@@ -20,7 +20,7 @@ const Fab: React.FC<IFab> = ({label, onClick}): JSX.Element => {
       <Surface style={homeScreenStyle.fab} elevation={4}>
         <View style={homeScreenStyle.fabContentWrapper}>
           <AddIcon />
-          <Text style={{fontSize: 22, marginStart: 6}}>{label}</Text>
+          <Text style={homeScreenStyle.fabTextStyle}>{label}</Text>
         </View>
       </Surface>
     </Pressable>

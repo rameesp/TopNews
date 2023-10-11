@@ -63,7 +63,7 @@ const ListItem: React.FC<IListItem> = ({
       <View
         style={[
           homeScreenStyle.swipeableContentContainer,
-          {backgroundColor: isPinned ? 'grey' : 'white'},
+          {backgroundColor: isPinned ? AppColors.cardPinned : AppColors.white},
         ]}>
         <Text numberOfLines={2} variant="titleMedium">
           {item?.title ?? AppString.errorHeading}

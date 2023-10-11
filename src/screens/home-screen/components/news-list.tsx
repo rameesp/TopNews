@@ -44,7 +44,7 @@ const NewsList: React.FC<INewsList> = React.memo(
     );
     return (
       <>
-        <GestureHandlerRootView style={{flex: 1}}>
+        <GestureHandlerRootView style={homeScreenStyle.flexOne}>
           <FlatList
             data={data}
             ListHeaderComponent={
