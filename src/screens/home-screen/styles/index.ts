@@ -39,6 +39,20 @@ const homeScreenStyle = StyleSheet.create({
   },
   homeContainer: {height: '100%'},
   flexOne: {flex: 1},
-  fabTextStyle:{fontSize: 22, marginStart: 6}
+  fabTextStyle: {fontSize: 22, marginStart: 6},
+  loaderContainer: {
+    flex: 1,
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '100%',
+    width: '100%',
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textStyle: {color: 'black', fontSize: 22},
 });
 export default homeScreenStyle;

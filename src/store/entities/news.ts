@@ -230,8 +230,8 @@ export const callNewsApi =
   ({invalidateCache = false}: {invalidateCache: boolean}) =>
   (dispatch: AppDispatch, getState: () => RootState) => {
     let payload = {
-      // url: 'everything?q=india&pageSize=100&page=1&apiKey=93772fedfa9044dda2505c63d9b9dcc1',
-      url: '9469c301-0ed9-492c-9993-1d2685edec84',
+      url: 'everything?q=india&pageSize=100&page=1&apiKey=93772fedfa9044dda2505c63d9b9dcc1',
+      // url: '9469c301-0ed9-492c-9993-1d2685edec84',
       invalidateCache: invalidateCache,
       method: httpMethods.GET,
       onStart: getNewsStart.type,
@@ -283,6 +283,13 @@ export const getViewableList = createSelector(
 export const getIsLoading = createSelector(
   (state: RootState) => state.news,
   news => news.isLoading,
+);
+/**
+ * Loading status while getting data 
+ */
+export const getIsError = createSelector(
+  (state: RootState) => state.news,
+  news => news.isError,
 );
 /**
  * to get overall list

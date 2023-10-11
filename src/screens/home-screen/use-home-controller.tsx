@@ -11,6 +11,7 @@ import {
   pinItemInArticle,
   unPinItemInArticle,
   updateListWithRandomArticle,
+  getIsError,
 } from '../../store/entities/news';
 import {AppDispatch} from '../../store/configure';
 import useCountDown from '../../util/hooks/use-timer';
@@ -21,6 +22,7 @@ const useHomeController = () => {
   const topNews = useSelector(getViewableList); //top news or visible news on list
   const pinnedNews = useSelector(getPinnedArticles); //pinned news list
   const isLoading = useSelector(getIsLoading);//is loading of news for initial time
+  const isError = useSelector(getIsError);//is loading of news for initial time
   const articles = useSelector(getArticles);//total news list
   const unPinnedArticle = useSelector(getUnPinnedArticle);//unpinned item from pinned list
   const dispatch = useDispatch<AppDispatch>();
@@ -83,6 +85,7 @@ const useHomeController = () => {
     pinnedNews,
     unPinnedArticle,
     visibleListLength: topNews.length + pinnedNews.length,
+    isError,
     getNextSetOnArticle: getNextSetOfArticles,
     getNextBatchOfData,
     onDeleteItem,

@@ -7,6 +7,7 @@ import NewsList from './components/news-list';
 import SnackBar from './components/snack-bar';
 import homeScreenStyle from './styles';
 import AppString from '../../resources/values/strings';
+import {Text} from 'react-native-paper';
 
 const HomeScreen: React.FC = (): JSX.Element => {
   const {
@@ -22,6 +23,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
     visibleListLength,
     onDeletePinned,
     onUnPin,
+    isError,
   } = useHomeController();
 
   const [data, setData] = useState<LocalArticle[]>([]);
@@ -122,7 +124,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
   }, []);
   //on end of flat-list
   const onEndReached = useCallback(() => {
-    if (visibleListLength >= articlesLength) {
+    if (visibleListLength >= articlesLength && articlesLength > 10) {
       //it means all data in the redux has been loaded time to load new set of set of data from backend
       setOpenSnackBar({
         isVisible: true,
@@ -156,6 +158,13 @@ const HomeScreen: React.FC = (): JSX.Element => {
         onAction={onSnackBarAction}
         message={openSnackBar.messageNextSet || ''}
       />
+      {(isLoading || isError) && (
+        <View style={homeScreenStyle.loaderContainer}>
+          <Text style={homeScreenStyle.textStyle}>
+            {isError ? AppString.errorMessage : AppString.loading}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
