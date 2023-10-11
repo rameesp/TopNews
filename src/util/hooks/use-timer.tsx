@@ -10,12 +10,11 @@ interface IProps {
   start?: number;
   fps?: number;
 }
-  
+
 /**
- * @param start start value of timer 
- * @param fps ticker will tick after every n seconds
+ * @param start start value of timer
  */
-const useCountDown = ({start, fps}: IProps): ITimer => {
+const useCountDown = ({start}: IProps): ITimer => {
   const [timer, setTimer] = useState(start || 0);
   const intervalRef = useRef<NodeJS.Timeout>();
 
@@ -34,8 +33,8 @@ const useCountDown = ({start, fps}: IProps): ITimer => {
       return stopTimer();
     }
     intervalRef.current = setInterval(() => {
-      setTimer(t => t - 1 / (fps || 1));
-    }, 1000 / (fps || 1));
+      setTimer(t => t - 1);
+    }, 1000);
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);

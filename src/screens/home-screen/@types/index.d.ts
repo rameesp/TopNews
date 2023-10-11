@@ -34,7 +34,6 @@ interface IListItem {
 }
 interface ISnackBarState {
   isVisible: boolean;
-  action: 'REFRESH' | 'NEW_BATCH';
   messageRefresh?: String;
   messageNextSet?: String;
 }

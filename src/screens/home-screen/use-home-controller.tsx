@@ -34,9 +34,7 @@ const useHomeController = () => {
   }, [articles]);
   useEffect(() => {
     //if timer is timed out to randomize and load next set of data
-    if (timer <= 0 && topNews.length !== articles.length) {
-      console.log(timer);
-      
+    if (timer <= 0 && topNews.length !== articles.length) {      
       startTimerWithTimeLimit()
       dispatch(updateListWithRandomArticle());
     }

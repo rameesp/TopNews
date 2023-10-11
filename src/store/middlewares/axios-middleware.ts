@@ -39,7 +39,6 @@ const makeRequest = async (dispatch: AppDispatch, payload: IPayLoadType) => {
       payload: response.data ? response.data : [],
     }); //after a successful request we can dispatch onSuccess with payload as response data
   } catch (ex) {
-    console.log(ex);
 
     dispatch({type: onError, payload: ex}); // incase any error happens we will dispatch onError with error message
   }
@@ -51,7 +50,6 @@ const axiosMiddleware =
   (next: any) =>
   async (action: any) => {
     if (action.type == apiCallBegan.type) {
-      console.log('home');
       makeRequest(dispatch, action.payload);
       return;
     }

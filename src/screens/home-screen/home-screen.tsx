@@ -5,7 +5,6 @@ import useHomeController from './use-home-controller';
 import Fab from './widgets/fab';
 import NewsList from './components/news-list';
 import SnackBar from './components/snack-bar';
-import {SNACKBAR_ACTION} from '../../constants/constants';
 import homeScreenStyle from './styles';
 import AppString from '../../resources/values/strings';
 
@@ -28,7 +27,6 @@ const HomeScreen: React.FC = (): JSX.Element => {
   const [data, setData] = useState<LocalArticle[]>([]);
   const [openSnackBar, setOpenSnackBar] = useState<ISnackBarState>({
     isVisible: false,
-    action: SNACKBAR_ACTION.REFRESH,
     messageRefresh: '',
     messageNextSet: '',
   });
@@ -110,7 +108,7 @@ const HomeScreen: React.FC = (): JSX.Element => {
   }, [topNews, data]);
   //to reset the snack bar
   const openSnackBarDismissed = useCallback(() => {
-    setOpenSnackBar({isVisible: false, action: SNACKBAR_ACTION.REFRESH});
+    setOpenSnackBar({isVisible: false});
   }, []);
 
   //to load the next set of data from backend
@@ -120,35 +118,14 @@ const HomeScreen: React.FC = (): JSX.Element => {
   };
 
   const onSnackBarAction = useCallback(() => {
-    switch (openSnackBar.action) {
-      case SNACKBAR_ACTION.REFRESH: //refresh means we need to next set of data from local
-        onLoadLoadedData();
-        break;
-      case SNACKBAR_ACTION.NEW_BATCH: //it means we need to load next batch of data from backend
-        onLoadNextBatch();
-        break;
-      default:
-        break;
-    }
-  }, [openSnackBar]);
+    onLoadNextBatch();
+  }, []);
   //on end of flat-list
   const onEndReached = useCallback(() => {
-    if (visibleListLength < articlesLength) {
-      if (topNews) {
-        if (data.length < topNews?.length) {
-          //means there is still data pending in the redux state to load
-          setOpenSnackBar({
-            isVisible: true,
-            action: SNACKBAR_ACTION.REFRESH,
-            messageRefresh: AppString.refreshDataMessage,
-          });
-        }
-      }
-    } else if (visibleListLength >= articlesLength) {
+    if (visibleListLength >= articlesLength) {
       //it means all data in the redux has been loaded time to load new set of set of data from backend
       setOpenSnackBar({
         isVisible: true,
-        action: SNACKBAR_ACTION.NEW_BATCH,
         messageNextSet: AppString.loadNextBatchMessage,
       });
     }
@@ -175,17 +152,9 @@ const HomeScreen: React.FC = (): JSX.Element => {
       <SnackBar
         isVisible={openSnackBar.isVisible}
         onDismiss={openSnackBarDismissed}
-        actionLabel={
-          openSnackBar.action == SNACKBAR_ACTION.REFRESH
-            ? AppString.loadMore
-            : AppString.loadNewBatch
-        }
+        actionLabel={AppString.loadNewBatch}
         onAction={onSnackBarAction}
-        message={
-          (openSnackBar.action == SNACKBAR_ACTION.REFRESH
-            ? openSnackBar.messageRefresh
-            : openSnackBar.messageNextSet) || ''
-        }
+        message={openSnackBar.messageNextSet || ''}
       />
     </View>
   );
